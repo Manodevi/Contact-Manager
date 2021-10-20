@@ -6,6 +6,9 @@ const app = express();
 // Connect Database
 connectDB();
 
+// Init Middleware
+app.use(express.json({ extended: false })); // now can accept body data
+
 app.get('/', (req, res) => res.json({msg : "Welcome to the Contact Manager API..."}));
 
 // Define Routes
