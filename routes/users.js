@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
-
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 
 // @route   POST api/users 
@@ -25,15 +25,22 @@ router.post(
     const { name, email, password } = req.body;
 
     try {
-      let user = User.findOne({ email });
+      let user = await User.findOne({ email });
 
       if(user) {
         return res.status(400).json({ msg: "User already exists"}); // status 400: bad request
       }
  
       user = new User({ name, email, password }); // it doesn't saved in DB, just created an instance
-    } catch (err) {
+      
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt); // hash version of the password
+      await user.save();
 
+      res.send('user saved');
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Server error');
     }
     
 });
